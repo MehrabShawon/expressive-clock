@@ -132,9 +132,9 @@ fun ClockDock(
             }
         }
 
-        // The add button rides the pill's top-right corner, raised above it. Its lower edge
-        // overlaps the pill just enough to read as attached, and it clears the rightmost tab
-        // icon below. The pill itself never moves when this button appears or disappears.
+        // The add button floats in the open space above the pill's top-right corner, clear of
+        // the pill entirely — its lower edge sits 24 dp above the pill's top edge, so it overlaps
+        // nothing. The pill itself never moves when this button appears or disappears.
         Box(
             modifier = Modifier
                 .align(Alignment.TopEnd)
@@ -231,7 +231,8 @@ private fun RowScope.DockItem(tab: Tab, selected: Boolean, iconColor: Color, onC
 
 val DOCK_HEIGHT = 72.dp
 private val DOCK_WIDTH = 204.dp
-/** How far the add button sits above the pill's top edge. */
-val FAB_RAISE = 56.dp
+/** How far the add button sits above the pill's top edge. 96 dp lifts the 72 dp button so its
+ *  lower edge clears the pill top by 24 dp and it overlaps nothing. */
+val FAB_RAISE = 96.dp
 /** How far the add button sticks out past the pill's right edge. */
-private val FAB_OVERHANG_X = 24.dp
+private val FAB_OVERHANG_X = 32.dp
