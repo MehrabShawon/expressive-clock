@@ -52,14 +52,25 @@ jobs:
             -storepass android -keypass android \
             -dname "CN=Debug, OU=Debug, O=Debug, L=Debug, ST=Debug, C=BD"
 
-      - name: Build debug APK
+      - name: Build debug and release APKs
+        # The release build is minified with R8 (isMinifyEnabled) and runs like
+        # the original app; the debug build is unoptimised and visibly slower
+        # (sluggish transitions, slow startup, the empty-alarm flash). Both are
+        # uploaded so the fast release build is the one to install.
         run: |
           chmod +x gradlew
-          ./gradlew assembleDebug --no-configuration-cache -x lint
+          ./gradlew assembleDebug assembleRelease --no-configuration-cache -x lint
 
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
           name: ExpressiveClock-debug
           path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+
+      - name: Upload release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ExpressiveClock-release
+          path: app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
