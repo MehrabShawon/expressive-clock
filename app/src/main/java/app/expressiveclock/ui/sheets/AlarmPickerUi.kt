@@ -369,7 +369,10 @@ private fun AlarmWheel(
                         text = format(value),
                         capHeight = 48.dp,
                         color = if (centered) {
-                            MaterialTheme.colorScheme.primary
+                            // The selected value sits on the primaryContainer selection window,
+                            // so it takes onPrimaryContainer: primary itself is light in a dark
+                            // scheme and washed out against the light band.
+                            MaterialTheme.colorScheme.onPrimaryContainer
                         } else {
                             MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = .52f)
                         },
