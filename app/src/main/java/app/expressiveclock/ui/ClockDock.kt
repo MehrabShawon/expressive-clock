@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.height
@@ -42,9 +41,10 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.dp
 
 /**
- * Fixed-stage dock. The add button never changes the measured width of the stage, so moving from
- * Alarms to another tab cannot make the dock jump/stutter. Instead the dock and add button animate
- * within the same centered stage.
+ * Fixed-stage dock. The pill is always the same width and always centred, on every tab.
+ * The add button rides the pill's top-right corner, raised above it, instead of sitting
+ * beside the pill — so showing or hiding it cannot move the pill, and the pill never has to
+ * jump or stutter when the tab changes.
  */
 @Composable
 fun ClockDock(
@@ -61,11 +61,6 @@ fun ClockDock(
     val blue = MaterialTheme.colorScheme.primary
     val dockTint = if (dark) MaterialTheme.colorScheme.surfaceContainer.copy(alpha = .88f) else MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = .84f)
 
-    val dockShift by animateDpAsState(
-        targetValue = if (showAdd) 0.dp else (DOCK_HEIGHT + FAB_GAP) / 2,
-        animationSpec = spring(dampingRatio = 0.86f, stiffness = 560f),
-        label = "dockShift",
-    )
     val addAlpha by animateFloatAsState(
         targetValue = if (showAdd) 1f else 0f,
         animationSpec = tween(180),
@@ -81,99 +76,95 @@ fun ClockDock(
         modifier = modifier,
         contentAlignment = Alignment.Center,
     ) {
-        Row(
+        Box(
             modifier = Modifier
-                .width(DOCK_STAGE_WIDTH)
-                .padding(horizontal = 0.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(FAB_GAP),
+                .width(DOCK_WIDTH)
+                .height(DOCK_HEIGHT)
+                .luminousElasticClickable(
+                    shape = RoundedCornerShape(DOCK_HEIGHT / 2),
+                    maxStretchPercent = 0.06f,
+                    maxTranslateDp = 1.8.dp,
+                )
+                .glass(
+                    RoundedCornerShape(DOCK_HEIGHT / 2),
+                    dockTint,
+                    .88f,
+                    shadowElevation = if (enableGlow) 18.dp else 0.dp,
+                )
+                .then(if (enableGlow) Modifier.blueGlow(RoundedCornerShape(DOCK_HEIGHT / 2)) else Modifier),
+            contentAlignment = Alignment.Center,
         ) {
-            Box(
-                modifier = Modifier
-                    .width(DOCK_WIDTH)
-                    .height(DOCK_HEIGHT)
-                    .graphicsLayer { translationX = dockShift.toPx() }
-                    .luminousElasticClickable(
-                        shape = RoundedCornerShape(DOCK_HEIGHT / 2),
-                        maxStretchPercent = 0.06f,
-                        maxTranslateDp = 1.8.dp,
-                    )
-                    .glass(
-                        RoundedCornerShape(DOCK_HEIGHT / 2),
-                        dockTint,
-                        .88f,
-                        shadowElevation = if (enableGlow) 18.dp else 0.dp,
-                    )
-                    .then(if (enableGlow) Modifier.blueGlow(RoundedCornerShape(DOCK_HEIGHT / 2)) else Modifier),
-                contentAlignment = Alignment.Center,
-            ) {
-                BoxWithConstraints(Modifier.fillMaxSize()) {
-                    val selectedIndex = destinations.indexOf(selected).coerceAtLeast(0)
-                    val itemWidth = maxWidth / destinations.size
-                    val indicatorSize = 50.dp
-                    val selectedOffset by animateDpAsState(
-                        targetValue = itemWidth * selectedIndex + (itemWidth - indicatorSize) / 2,
-                        animationSpec = spring(dampingRatio = 0.84f, stiffness = 600f),
-                        label = "dockIndicator",
-                    )
-                    Box(
-                        modifier = Modifier
-                            .offset(
-                                x = selectedOffset,
-                                y = (DOCK_HEIGHT - indicatorSize) / 2,
-                            )
-                            .size(indicatorSize)
-                            .clip(CircleShape)
-                            .background(
-                                if (dark) Color(0xFF24303B) else Color.White.copy(alpha = .99f)
-                            ),
-                    )
-                    Row(
-                        modifier = Modifier.fillMaxSize(),
-                        horizontalArrangement = Arrangement.SpaceEvenly,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        destinations.forEach { d ->
-                            DockItem(
-                                tab = d,
-                                selected = d == selected,
-                                iconColor = if (dark) Color.White.copy(alpha = .94f) else blue,
-                                onClick = { onSelect(d) },
-                            )
-                        }
+            BoxWithConstraints(Modifier.fillMaxSize()) {
+                val selectedIndex = destinations.indexOf(selected).coerceAtLeast(0)
+                val itemWidth = maxWidth / destinations.size
+                val indicatorSize = 50.dp
+                val selectedOffset by animateDpAsState(
+                    targetValue = itemWidth * selectedIndex + (itemWidth - indicatorSize) / 2,
+                    animationSpec = spring(dampingRatio = 0.84f, stiffness = 600f),
+                    label = "dockIndicator",
+                )
+                Box(
+                    modifier = Modifier
+                        .offset(
+                            x = selectedOffset,
+                            y = (DOCK_HEIGHT - indicatorSize) / 2,
+                        )
+                        .size(indicatorSize)
+                        .clip(CircleShape)
+                        .background(
+                            if (dark) Color(0xFF24303B) else Color.White.copy(alpha = .99f)
+                        ),
+                )
+                Row(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    destinations.forEach { d ->
+                        DockItem(
+                            tab = d,
+                            selected = d == selected,
+                            iconColor = if (dark) Color.White.copy(alpha = .94f) else blue,
+                            onClick = { onSelect(d) },
+                        )
                     }
                 }
             }
+        }
 
-            Box(
-                modifier = Modifier
-                    .size(DOCK_HEIGHT)
-                    .graphicsLayer {
-                        alpha = addAlpha
-                        scaleX = addScale
-                        scaleY = addScale
-                    }
-                    .luminousElasticClickable(
-                        enabled = showAdd,
-                        shape = CircleShape,
-                        maxStretchPercent = 0.08f,
-                        maxTranslateDp = 2.0.dp,
-                        onClick = onAdd,
-                    )
-                    .clip(CircleShape)
-                    .glass(
-                        CircleShape,
-                        if (dark) MaterialTheme.colorScheme.primaryContainer.copy(alpha = .72f)
-                        else MaterialTheme.colorScheme.primaryContainer.copy(alpha = .58f),
-                        .92f,
-                        shadowElevation = if (enableGlow) 18.dp else 0.dp,
-                    )
-                    .then(if (enableGlow) Modifier.blueGlow(CircleShape) else Modifier)
-                    .clearAndSetSemantics { contentDescription = addLabel },
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(Icons.Rounded.Add, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimaryContainer, modifier = Modifier.size(31.dp))
-            }
+        // The add button rides the pill's top-right corner, raised above it. Its lower edge
+        // overlaps the pill just enough to read as attached, and it clears the rightmost tab
+        // icon below. The pill itself never moves when this button appears or disappears.
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .offset(x = FAB_OVERHANG_X, y = -FAB_RAISE)
+                .size(DOCK_HEIGHT)
+                .graphicsLayer {
+                    alpha = addAlpha
+                    scaleX = addScale
+                    scaleY = addScale
+                }
+                .luminousElasticClickable(
+                    enabled = showAdd,
+                    shape = CircleShape,
+                    maxStretchPercent = 0.08f,
+                    maxTranslateDp = 2.0.dp,
+                    onClick = onAdd,
+                )
+                .clip(CircleShape)
+                .glass(
+                    CircleShape,
+                    if (dark) MaterialTheme.colorScheme.primaryContainer.copy(alpha = .72f)
+                    else MaterialTheme.colorScheme.primaryContainer.copy(alpha = .58f),
+                    .92f,
+                    shadowElevation = if (enableGlow) 18.dp else 0.dp,
+                )
+                .then(if (enableGlow) Modifier.blueGlow(CircleShape) else Modifier)
+                .clearAndSetSemantics { contentDescription = addLabel },
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(Icons.Rounded.Add, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimaryContainer, modifier = Modifier.size(31.dp))
         }
     }
 }
@@ -240,5 +231,7 @@ private fun RowScope.DockItem(tab: Tab, selected: Boolean, iconColor: Color, onC
 
 val DOCK_HEIGHT = 72.dp
 private val DOCK_WIDTH = 204.dp
-private val FAB_GAP = 10.dp
-private val DOCK_STAGE_WIDTH = DOCK_WIDTH + FAB_GAP + DOCK_HEIGHT
+/** How far the add button sits above the pill's top edge. */
+val FAB_RAISE = 56.dp
+/** How far the add button sticks out past the pill's right edge. */
+private val FAB_OVERHANG_X = 24.dp

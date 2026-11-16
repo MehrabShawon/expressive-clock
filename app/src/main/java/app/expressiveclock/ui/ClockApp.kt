@@ -90,8 +90,12 @@ private val DOCK_CLEARANCE = 20.dp
  * comment was still true and the constant was silently 8 dp short, which shows up as the last row
  * of every list tucked a little too far under the dock. There is nothing to notice and nothing to
  * fail; it just quietly looks wrong.
+ *
+ * The last term is the raised add button: it sits [FAB_RAISE] above the pill's top edge on the
+ * Alarms tab, so the reserve has to clear it too, or the last row of alarms would slide under
+ * the button.
  */
-private val DOCK_RESERVE = DOCK_HEIGHT + DOCK_CLEARANCE + 12.dp
+private val DOCK_RESERVE = DOCK_HEIGHT + DOCK_CLEARANCE + FAB_RAISE + 4.dp
 
 enum class Tab(val label: String, val icon: ImageVector, val key: String) {
     ALARMS("Alarms", Icons.Outlined.Alarm, Notifications.TAB_ALARMS),
@@ -102,10 +106,10 @@ enum class Tab(val label: String, val icon: ImageVector, val key: String) {
 /**
  * The app shell.
  *
- * Navigation is [ClockDock], a floating pill with a detached add button and no navigation bar, so
- * the alarm grid and the world-clock list run full-bleed to the bottom edge. That component owes
- * the accessibility contract a `ShortNavigationBar` would have supplied for free; see its own
- * documentation for what it pays and why.
+ * Navigation is [ClockDock], a floating pill with a raised add button on its top-right corner
+ * and no navigation bar, so the alarm grid and the world-clock list run full-bleed to the bottom
+ * edge. That component owes the accessibility contract a `ShortNavigationBar` would have supplied
+ * for free; see its own documentation for what it pays and why.
  *
  * Settings are always available from the top-right gear, regardless of which page is visible.
  */
