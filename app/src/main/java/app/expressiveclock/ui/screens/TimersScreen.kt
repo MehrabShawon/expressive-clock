@@ -1444,13 +1444,18 @@ private fun TimerControlPill(
         modifier = Modifier
             .fillMaxWidth()
             .height(TIMER_ROW_HEIGHT)
+            .clickable(onClick = onClick)
             .clip(CircleShape)
-            .background(
+            // The same glass surface WidePill (the original chip) uses: a near-opaque
+            // light gradient, not a flat translucent fill. A flat 0.40-alpha fill over
+            // the dark background is what turned the chips dark slate blue.
+            .glass(
+                CircleShape,
                 if (outlined) MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = .94f)
                 else container.copy(alpha = .40f),
-            )
-            .border(1.25.dp, Color.White.copy(alpha = .14f), CircleShape)
-            .clickable(onClick = onClick),
+                .86f,
+                shadowElevation = 0.dp,
+            ),
         contentAlignment = Alignment.Center,
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
