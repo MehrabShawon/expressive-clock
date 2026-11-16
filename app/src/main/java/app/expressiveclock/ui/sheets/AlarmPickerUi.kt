@@ -474,6 +474,16 @@ private fun MeridiemTextButton(text: String, selected: Boolean, onClick: () -> U
                 // label, so the selected AM/PM reads — dark text on a light chip.
                 if (selected) MaterialTheme.colorScheme.primaryContainer
                 else MaterialTheme.colorScheme.surfaceContainerLow
+            )
+            // The unselected button gets a white outline so the two are easy to
+            // tell apart at a glance — the selected one is the filled light chip.
+            .then(
+                if (selected) Modifier
+                else Modifier.border(
+                    1.dp,
+                    Color.White.copy(alpha = .55f),
+                    RoundedCornerShape(12.dp),
+                )
             ),
     ) {
         Text(
