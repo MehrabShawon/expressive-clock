@@ -1,10 +1,15 @@
 package app.expressiveclock.ui
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -60,17 +65,6 @@ fun ClockDock(
     val dark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
     val blue = MaterialTheme.colorScheme.primary
     val dockTint = if (dark) MaterialTheme.colorScheme.surfaceContainer.copy(alpha = .88f) else MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = .84f)
-
-    val addAlpha by animateFloatAsState(
-        targetValue = if (showAdd) 1f else 0f,
-        animationSpec = tween(180),
-        label = "addAlpha",
-    )
-    val addScale by animateFloatAsState(
-        targetValue = if (showAdd) 1f else .78f,
-        animationSpec = spring(dampingRatio = 0.9f, stiffness = 620f),
-        label = "addScale",
-    )
 
     Box(
         modifier = modifier,
@@ -133,38 +127,45 @@ fun ClockDock(
         }
 
         // The add button floats in the open space above the pill's top-right corner, clear of
-        // the pill entirely — its lower edge sits 24 dp above the pill's top edge, so it overlaps
-        // nothing. The pill itself never moves when this button appears or disappears.
-        Box(
+        // the pill entirely — its lower edge sits 24 dp above the pill's top edge. It is only
+        // composed while it is shown: AnimatedVisibility removes it from the layout when
+        // hidden, which matters because the raised button sits directly over the timer
+        // screen's Cancel pill, and an invisible-but-composed button there still swallows
+        // taps on the Cancel pill's left half, including the close icon — that is why the
+        // x never worked. The pill itself never moves when this button appears or disappears.
+        AnimatedVisibility(
+            visible = showAdd,
+            enter = fadeIn(animationSpec = tween(180)) +
+                scaleIn(initialScale = .78f, animationSpec = spring(dampingRatio = 0.9f, stiffness = 620f)),
+            exit = fadeOut(animationSpec = tween(180)) +
+                scaleOut(targetScale = .78f, animationSpec = spring(dampingRatio = 0.9f, stiffness = 620f)),
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .offset(x = FAB_OVERHANG_X, y = -FAB_RAISE)
-                .size(DOCK_HEIGHT)
-                .graphicsLayer {
-                    alpha = addAlpha
-                    scaleX = addScale
-                    scaleY = addScale
-                }
-                .luminousElasticClickable(
-                    enabled = showAdd,
-                    shape = CircleShape,
-                    maxStretchPercent = 0.08f,
-                    maxTranslateDp = 2.0.dp,
-                    onClick = onAdd,
-                )
-                .clip(CircleShape)
-                .glass(
-                    CircleShape,
-                    if (dark) MaterialTheme.colorScheme.primaryContainer.copy(alpha = .72f)
-                    else MaterialTheme.colorScheme.primaryContainer.copy(alpha = .58f),
-                    .92f,
-                    shadowElevation = if (enableGlow) 18.dp else 0.dp,
-                )
-                .then(if (enableGlow) Modifier.blueGlow(CircleShape) else Modifier)
-                .clearAndSetSemantics { contentDescription = addLabel },
-            contentAlignment = Alignment.Center,
+                .offset(x = FAB_OVERHANG_X, y = -FAB_RAISE),
         ) {
-            Icon(Icons.Rounded.Add, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimaryContainer, modifier = Modifier.size(31.dp))
+            Box(
+                modifier = Modifier
+                    .size(DOCK_HEIGHT)
+                    .luminousElasticClickable(
+                        shape = CircleShape,
+                        maxStretchPercent = 0.08f,
+                        maxTranslateDp = 2.0.dp,
+                        onClick = onAdd,
+                    )
+                    .clip(CircleShape)
+                    .glass(
+                        CircleShape,
+                        if (dark) MaterialTheme.colorScheme.primaryContainer.copy(alpha = .72f)
+                        else MaterialTheme.colorScheme.primaryContainer.copy(alpha = .58f),
+                        .92f,
+                        shadowElevation = if (enableGlow) 18.dp else 0.dp,
+                    )
+                    .then(if (enableGlow) Modifier.blueGlow(CircleShape) else Modifier)
+                    .clearAndSetSemantics { contentDescription = addLabel },
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(Icons.Rounded.Add, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimaryContainer, modifier = Modifier.size(31.dp))
+            }
         }
     }
 }
