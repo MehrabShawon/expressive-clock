@@ -11,7 +11,10 @@ android {
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "app.expressiveclock"
+        // The install identity. The code package (namespace) stays app.expressiveclock;
+        // only the applicationId changes, so the app installs as com.shawon.clock and
+        // sits alongside the original Expressive Clock instead of conflicting with it.
+        applicationId = "com.shawon.clock"
         minSdk = 26
         targetSdk = 36
         versionCode = 7
