@@ -1,0 +1,62 @@
+name: Build debug APK
+
+# Builds the debug APK on every push to main and on pull requests.
+# The APK is uploaded as a build artifact (ExpressiveClock-debug).
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build debug APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      # The release signing block in app/build.gradle.kts is evaluated for
+      # every build, including debug, so it needs these properties to exist.
+      # They point at a throwaway debug keystore generated below — never a
+      # real release key.
+      ORG_GRADLE_PROJECT_clockStoreFile: ${{ github.workspace }}/debug.keystore
+      ORG_GRADLE_PROJECT_clockStorePassword: android
+      ORG_GRADLE_PROJECT_clockKeyAlias: debug
+      ORG_GRADLE_PROJECT_clockKeyPassword: android
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "25"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android platform and build tools
+        # API 37 is only in the canary channel of sdkmanager, hence --channel=3
+        # for the platform. Build tools and platform-tools come from stable.
+        run: |
+          sdkmanager "platform-tools" "build-tools;37.0.0"
+          sdkmanager --channel=3 "platforms;android-37.0"
+
+      - name: Generate a local debug keystore
+        run: |
+          keytool -genkeypair -keystore debug.keystore -alias debug \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -storepass android -keypass android \
+            -dname "CN=Debug, OU=Debug, O=Debug, L=Debug, ST=Debug, C=BD"
+
+      - name: Build debug APK
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-configuration-cache -x lint
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ExpressiveClock-debug
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
