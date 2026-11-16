@@ -1328,12 +1328,12 @@ private fun TimerControls(
     val e = expand.coerceIn(0f, 1f)
 
     SubcomposeLayout(
-        // Only 8 dp of side padding here (the screen column already insets 20 dp):
-        // the trio's three pills are each a third of this row, and at 20 dp the
-        // "Cancel" label plus its icon did not fit, so the text clipped to "Canc"
-        // and the close icon sat cramped at the pill's edge. Widening the row gives
-        // Cancel room for its full label and a proper touch target for the icon.
-        Modifier.fillMaxWidth().height(TIMER_ROW_HEIGHT).padding(horizontal = 8.dp),
+        // No side padding here (the screen column already insets 20 dp): the trio's
+        // three pills are each a third of this row, and even at 8 dp the "Resume"
+        // label plus its icon did not fit, so it clipped to "Resum", and the close
+        // icon sat cramped at the Cancel pill's edge. Full width gives every label
+        // room and the icons a proper touch target.
+        Modifier.fillMaxWidth().height(TIMER_ROW_HEIGHT),
     ) { constraints ->
         val full = constraints.maxWidth
         val h = TIMER_ROW_HEIGHT.roundToPx()
