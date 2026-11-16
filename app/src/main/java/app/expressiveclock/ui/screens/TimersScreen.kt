@@ -1128,13 +1128,15 @@ private fun RunningTimerBody(
                 ExpressiveTimerRing(progress = progress, color = primary, running = timer.state == TimerState.RUNNING || isFinished)
 
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    // Slightly smaller than the ring's inner space so the digits clear
+                    // the wavy progress ring instead of overlapping it.
                     TickerTimerReadout(
                         text = formatTimer(remaining),
-                        capHeight = 49.dp,
+                        capHeight = 44.dp,
                         scale = 0.98f,
                         spacing = 0.5.dp,
-                        digitWidth = 47.dp,
-                        colonWidth = 13.dp,
+                        digitWidth = 42.dp,
+                        colonWidth = 12.dp,
                         rollDirection = TimerRollDirection.DOWN,
                         enableStagger = true,
                     )
@@ -1326,7 +1328,12 @@ private fun TimerControls(
     val e = expand.coerceIn(0f, 1f)
 
     SubcomposeLayout(
-        Modifier.fillMaxWidth().height(TIMER_ROW_HEIGHT).padding(horizontal = 20.dp),
+        // Only 8 dp of side padding here (the screen column already insets 20 dp):
+        // the trio's three pills are each a third of this row, and at 20 dp the
+        // "Cancel" label plus its icon did not fit, so the text clipped to "Canc"
+        // and the close icon sat cramped at the pill's edge. Widening the row gives
+        // Cancel room for its full label and a proper touch target for the icon.
+        Modifier.fillMaxWidth().height(TIMER_ROW_HEIGHT).padding(horizontal = 8.dp),
     ) { constraints ->
         val full = constraints.maxWidth
         val h = TIMER_ROW_HEIGHT.roundToPx()
