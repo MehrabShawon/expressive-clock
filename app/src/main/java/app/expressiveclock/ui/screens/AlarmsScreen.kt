@@ -212,9 +212,15 @@ private const val GAP_FRACTION = 8.3f / 155f - 2f * TRACKING_DELTA_AS_CAP
  */
 private const val SWITCH_TOUCH_INSET_DP = 8f
 /** A little shorter than the switch's 32 dp track, because level with it reads as shouting. */
-private const val DAY_CAP_DP = 23f
-/** Fixed, so the block is one width whatever the repeat pattern and the switch never shifts. */
-private const val DAY_BLOCK_DP = 91f
+private const val DAY_CAP_DP = 19f
+/**
+ * Fixed, so the block is one width whatever the repeat pattern and the switch never shifts.
+ *
+ * It shares the row with a 52 dp switch inside the tile's insets: on a ~393 dp phone the tile
+ * is ~174 dp, the row ~138 dp, so the block has to stay at or under ~86 dp or the last letters
+ * slide under the switch. 80 dp leaves a few dp of air on that narrowest tile.
+ */
+private const val DAY_BLOCK_DP = 80f
 /** The constant slice of space between letters. The scale is derived from it, not tuned. */
 private const val DAY_TRACKING_DP = 2.2f
 

@@ -228,21 +228,30 @@ fun StopwatchScreen(
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             item(key = "face") {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(540.dp)
-                        .graphicsLayer {
-                            scaleX = faceScale.value
-                            scaleY = faceScale.value
-                        },
+                BoxWithConstraints(
+                    modifier = Modifier.fillMaxWidth(),
                     contentAlignment = Alignment.Center,
                 ) {
-                    StopwatchFace(
-                        elapsedMillis = elapsed.toMillis(),
-                        running = stopwatch.running,
-                        onToggle = onToggle,
-                    )
+                    // The face is drawn at a fixed 410 dp; on a phone narrower than that it is
+                    // clipped at the edges. Scale the whole face — and the space reserved for
+                    // it — down just enough to fit, with a little air at the sides.
+                    val fitScale = ((maxWidth - 24.dp) / STOPWATCH_FACE_SIZE).coerceIn(0.5f, 1f)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(540.dp * fitScale)
+                            .graphicsLayer {
+                                scaleX = faceScale.value * fitScale
+                                scaleY = faceScale.value * fitScale
+                            },
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        StopwatchFace(
+                            elapsedMillis = elapsed.toMillis(),
+                            running = stopwatch.running,
+                            onToggle = onToggle,
+                        )
+                    }
                 }
             }
             item(key = "controls") {
