@@ -1,5 +1,7 @@
 package app.expressiveclock.ui.screens
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -184,16 +186,35 @@ fun WidePill(
     contentPaddingH: Dp = if (compact) 10.dp else 24.dp,
     contentAlpha: Float = 1f,
     glow: Boolean = true,
+    // Set false for pills whose edge icon must register every tap. The elastic
+    // press effect scales the pill to 0.95 and translates it toward the touch,
+    // which can drop a tap that starts near the pill's edge (the close icon)
+    // because the release then falls outside the shrunken bounds; a plain
+    // clickable has no such transform, so an edge tap always lands.
+    elastic: Boolean = true,
 ) {
+    // Only used by the plain-clickable branch; hoisted so remember runs in the
+    // same order on every composition regardless of the elastic flag.
+    val plainInteractionSource = remember { MutableInteractionSource() }
     Box(
         modifier = modifier
             .then(if (fillWidth) Modifier.fillMaxWidth() else Modifier)
             .height(height)
-            .luminousElasticClickable(
-                shape = CircleShape,
-                maxStretchPercent = 0.09f,
-                maxTranslateDp = 2.4.dp,
-                onClick = onClick,
+            .then(
+                if (elastic) {
+                    Modifier.luminousElasticClickable(
+                        shape = CircleShape,
+                        maxStretchPercent = 0.09f,
+                        maxTranslateDp = 2.4.dp,
+                        onClick = onClick,
+                    )
+                } else {
+                    Modifier.clickable(
+                        interactionSource = plainInteractionSource,
+                        indication = null,
+                        onClick = onClick,
+                    )
+                }
             )
             .clip(CircleShape)
             .glass(

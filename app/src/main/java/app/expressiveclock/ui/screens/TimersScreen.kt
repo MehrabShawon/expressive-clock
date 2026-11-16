@@ -1395,7 +1395,12 @@ private fun TimerControls(
                                 onClick = onPauseResume,
                                 height = TIMER_ROW_HEIGHT,
                                 compact = true,
+                                contentPaddingH = 6.dp,
                                 glow = false,
+                                // Plain tap (no elastic press-scale) so the label
+                                // and its icon register every tap, and tighter side
+                                // padding so the wider "Resume" label fits in full.
+                                elastic = false,
                             )
                         }
                         Box(Modifier.weight(1f)) {
@@ -1405,7 +1410,9 @@ private fun TimerControls(
                                 onClick = onAddTen,
                                 height = TIMER_ROW_HEIGHT,
                                 compact = true,
+                                contentPaddingH = 6.dp,
                                 glow = false,
+                                elastic = false,
                             )
                         }
                         Box(Modifier.weight(1f)) {
@@ -1417,7 +1424,13 @@ private fun TimerControls(
                                 outlined = true,
                                 content = MaterialTheme.colorScheme.onSurface,
                                 compact = true,
+                                contentPaddingH = 6.dp,
                                 glow = false,
+                                // Plain tap (no elastic press-scale): the close icon
+                                // sits near the pill's edge, where the elastic
+                                // shrink could drop the tap on release, so tapping
+                                // the icon did nothing while the centred text worked.
+                                elastic = false,
                             )
                         }
                     }
