@@ -334,17 +334,16 @@ private fun AlarmWheel(
         contentAlignment = Alignment.Center,
     ) {
         // Stationary selection window. The wheel itself moves underneath this frame.
-        // The window is the dark onPrimary, not primaryContainer: in this theme's dark scheme
-        // primaryContainer is a light periwinkle and the selected digit (onPrimaryContainer)
-        // is light too, so a primaryContainer window was light-on-light and unreadable.
-        // A dark window makes the light digit read, and in a light scheme onPrimary is light
-        // while onPrimaryContainer is dark, so the pairing reads there as well.
+        // The window keeps the app theme's primaryContainer (a light periwinkle in
+        // this theme's dark scheme). The selected digit is onPrimaryContainer, a dark
+        // navy here, so it reads clearly on the light chip — dark text on a light
+        // chip. Keep the chip the theme colour; the text is the part that was fixed.
         Box(
             modifier = Modifier
                 .fillMaxWidth(.82f)
                 .height(TickerHighlightHeight)
                 .clip(RoundedCornerShape(18.dp))
-                .background(MaterialTheme.colorScheme.onPrimary)
+                .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = .92f))
                 .align(Alignment.Center),
         )
 
@@ -374,11 +373,11 @@ private fun AlarmWheel(
                         text = format(value),
                         capHeight = 48.dp,
                         color = if (centered) {
-                            // The selected value sits on the dark onPrimary selection window,
-                            // so it takes onPrimaryContainer, which is light in a dark scheme
-                            // (and dark in a light scheme, where the window is light). The old
-                            // pairing — light onPrimaryContainer text on a light primaryContainer
-                            // window — was unreadable.
+                            // The selected value sits on the light primaryContainer window,
+                            // so it takes onPrimaryContainer, which is a dark navy in this
+                            // theme's dark scheme — dark text on a light chip, readable.
+                            // (The original used primary, a light periwinkle here, which was
+                            // light-on-light and unreadable.)
                             MaterialTheme.colorScheme.onPrimaryContainer
                         } else {
                             MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = .52f)
@@ -469,10 +468,9 @@ private fun MeridiemTextButton(text: String, selected: Boolean, onClick: () -> U
             .height(34.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(
-                // Same light-on-light defect as the wheel window: primaryContainer is light in
-                // this theme's dark scheme and the label (onPrimaryContainer) is light too.
-                // The dark onPrimary keeps the label readable in both schemes.
-                if (selected) MaterialTheme.colorScheme.onPrimary
+                // Theme chip (primaryContainer, light) with the dark onPrimaryContainer
+                // label, so the selected AM/PM reads — dark text on a light chip.
+                if (selected) MaterialTheme.colorScheme.primaryContainer
                 else MaterialTheme.colorScheme.surfaceContainerLow
             ),
     ) {
@@ -511,9 +509,9 @@ private fun AlarmNameCard(label: String, onLabelChange: (String) -> Unit) {
                 Modifier
                     .size(38.dp)
                     .clip(RoundedCornerShape(12.dp))
-                    // Dark onPrimary, not the light primaryContainer, so the light
-                    // onPrimaryContainer icon reads (same defect as the wheel window).
-                    .background(MaterialTheme.colorScheme.onPrimary),
+                    // Theme chip (primaryContainer, light) with the dark onPrimaryContainer
+                    // icon, so it reads — dark icon on a light chip.
+                    .background(MaterialTheme.colorScheme.primaryContainer),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
@@ -626,9 +624,9 @@ private fun OptionIconBubble(icon: androidx.compose.ui.graphics.vector.ImageVect
         Modifier
             .size(38.dp)
             .clip(RoundedCornerShape(12.dp))
-            // Dark onPrimary, not the light primaryContainer, so the light
-            // onPrimaryContainer icon reads (same defect as the wheel window).
-            .background(MaterialTheme.colorScheme.onPrimary),
+            // Theme chip (primaryContainer, light) with the dark onPrimaryContainer
+            // icon, so it reads — dark icon on a light chip.
+            .background(MaterialTheme.colorScheme.primaryContainer),
         contentAlignment = Alignment.Center,
     ) {
         Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimaryContainer, modifier = Modifier.size(20.dp))
@@ -665,11 +663,11 @@ internal fun SheetHeaderButton(
             .height(46.dp)
             .clip(RoundedCornerShape(18.dp))
             .background(
-                // Same pairing as the wheel window and the AM/PM button: the secondary button's
-                // label is onPrimaryContainer (light in a dark scheme), so its background must
-                // be the dark onPrimary, not the light primaryContainer.
+                // Theme chip (primaryContainer, light) with the dark onPrimaryContainer
+                // label, so Cancel reads — dark text on a light chip. The primary
+                // button (Save) already pairs light primary with dark onPrimary.
                 if (primary) MaterialTheme.colorScheme.primary
-                else MaterialTheme.colorScheme.onPrimary
+                else MaterialTheme.colorScheme.primaryContainer.copy(alpha = .70f)
             )
             .elasticClickable(onClick = onClick)
             .padding(horizontal = 16.dp),
