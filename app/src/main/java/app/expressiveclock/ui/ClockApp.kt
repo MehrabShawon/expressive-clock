@@ -91,11 +91,13 @@ private val DOCK_CLEARANCE = 20.dp
  * of every list tucked a little too far under the dock. There is nothing to notice and nothing to
  * fail; it just quietly looks wrong.
  *
- * The last term is the raised add button: it sits [FAB_RAISE] above the pill's top edge on the
- * Alarms tab, so the reserve has to clear it too, or the last row of alarms would slide under
- * the button.
+ * This is deliberately the ORIGINAL value (72 pill + 20 clearance + 12). The raised add button
+ * floats over the content like any FAB and does not get reserve space: growing the reserve to
+ * clear it (152 dp) shrank every screen's content area by 48 dp and made the timer's presets
+ * overflow onto the start button. The button may cover a corner of content scrolled to the
+ * very bottom, which is normal floating-button behaviour.
  */
-private val DOCK_RESERVE = DOCK_HEIGHT + DOCK_CLEARANCE + FAB_RAISE + 4.dp
+private val DOCK_RESERVE = DOCK_HEIGHT + DOCK_CLEARANCE + 12.dp
 
 enum class Tab(val label: String, val icon: ImageVector, val key: String) {
     ALARMS("Alarms", Icons.Outlined.Alarm, Notifications.TAB_ALARMS),
