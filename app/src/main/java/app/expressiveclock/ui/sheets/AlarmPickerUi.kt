@@ -203,7 +203,9 @@ fun AlarmPickerSheetContent(
             }
         }
 
-        Spacer(Modifier.height(8.dp))
+        // A clear gap here: the AM/PM buttons sat only 8 dp above the day chips
+        // and read as overlapping them.
+        Spacer(Modifier.height(16.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
