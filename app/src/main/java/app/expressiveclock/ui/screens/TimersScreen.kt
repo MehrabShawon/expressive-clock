@@ -29,6 +29,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -74,6 +75,7 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.luminance
@@ -1389,48 +1391,26 @@ private fun TimerControls(
                 Box(Modifier.graphicsLayer { alpha = split }) {
                     Row(horizontalArrangement = Arrangement.spacedBy(TIMER_GAP * split)) {
                         Box(Modifier.weight(1f)) {
-                            WidePill(
+                            TimerControlPill(
                                 text = if (running) "Pause" else "Resume",
                                 icon = if (running) Icons.Rounded.Pause else Icons.Rounded.PlayArrow,
                                 onClick = onPauseResume,
-                                height = TIMER_ROW_HEIGHT,
-                                compact = true,
-                                contentPaddingH = 6.dp,
-                                glow = false,
-                                // Plain tap (no elastic press-scale) so the label
-                                // and its icon register every tap, and tighter side
-                                // padding so the wider "Resume" label fits in full.
-                                elastic = false,
                             )
                         }
                         Box(Modifier.weight(1f)) {
-                            WidePill(
+                            TimerControlPill(
                                 text = "+10s",
                                 icon = Icons.Rounded.Add,
                                 onClick = onAddTen,
-                                height = TIMER_ROW_HEIGHT,
-                                compact = true,
-                                contentPaddingH = 6.dp,
-                                glow = false,
-                                elastic = false,
                             )
                         }
                         Box(Modifier.weight(1f)) {
-                            WidePill(
+                            TimerControlPill(
                                 text = "Cancel",
                                 icon = Icons.Rounded.Close,
                                 onClick = onCancel,
-                                height = TIMER_ROW_HEIGHT,
                                 outlined = true,
                                 content = MaterialTheme.colorScheme.onSurface,
-                                compact = true,
-                                contentPaddingH = 6.dp,
-                                glow = false,
-                                // Plain tap (no elastic press-scale): the close icon
-                                // sits near the pill's edge, where the elastic
-                                // shrink could drop the tap on release, so tapping
-                                // the icon did nothing while the centred text worked.
-                                elastic = false,
                             )
                         }
                     }
@@ -1441,6 +1421,52 @@ private fun TimerControls(
         layout(full, h) {
             single?.place(x, 0)
             trio?.place(0, 0)
+        }
+    }
+}
+
+// A plain, directly clickable pill for the timer controls. This deliberately
+// does not use WidePill: the close icon on the Cancel pill would not register
+// taps through WidePill's clickable (elastic or plain) while the centred text
+// did, so the trio uses the simplest possible clickable surface instead — one
+// Box, one clickable, icon and text inside it. The icon-to-text gap is tight
+// (4 dp) so the label sits slightly left, closer to its icon.
+@Composable
+private fun TimerControlPill(
+    text: String,
+    icon: ImageVector,
+    onClick: () -> Unit,
+    container: Color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.58f),
+    content: Color = MaterialTheme.colorScheme.onPrimaryContainer,
+    outlined: Boolean = false,
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(TIMER_ROW_HEIGHT)
+            .clip(CircleShape)
+            .background(
+                if (outlined) MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = .94f)
+                else container.copy(alpha = .40f),
+            )
+            .border(1.25.dp, Color.White.copy(alpha = .14f), CircleShape)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                icon,
+                contentDescription = null,
+                modifier = Modifier.size(22.dp),
+                tint = content,
+            )
+            Spacer(Modifier.width(4.dp))
+            Text(
+                text,
+                style = MaterialTheme.typography.titleMediumEmphasized,
+                color = content,
+                maxLines = 1,
+            )
         }
     }
 }
