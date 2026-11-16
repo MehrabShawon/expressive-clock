@@ -126,13 +126,15 @@ fun ClockDock(
             }
         }
 
-        // The add button floats in the open space above the pill's top-right corner, clear of
-        // the pill entirely — its lower edge sits 24 dp above the pill's top edge. It is only
-        // composed while it is shown: AnimatedVisibility removes it from the layout when
-        // hidden, which matters because the raised button sits directly over the timer
-        // screen's Cancel pill, and an invisible-but-composed button there still swallows
-        // taps on the Cancel pill's left half, including the close icon — that is why the
-        // x never worked. The pill itself never moves when this button appears or disappears.
+        // The add button sits beside the pill, at the pill's height, instead of riding
+        // above it — so its gaps to the pill, to the screen's right edge and to the
+        // screen's bottom are all small and balanced (about 8, 15 and 20 dp), instead
+        // of the raised position's small pill gap, big right gap and huge bottom gap.
+        // It is only composed while it is shown: AnimatedVisibility removes it from
+        // the layout when hidden, which matters because a raised button over the timer
+        // screen's Cancel pill still swallows taps on the Cancel pill's left half,
+        // including the close icon. The pill itself never moves when this button
+        // appears or disappears.
         AnimatedVisibility(
             visible = showAdd,
             enter = fadeIn(animationSpec = tween(180)) +
@@ -140,8 +142,8 @@ fun ClockDock(
             exit = fadeOut(animationSpec = tween(180)) +
                 scaleOut(targetScale = .78f, animationSpec = spring(dampingRatio = 0.9f, stiffness = 620f)),
             modifier = Modifier
-                .align(Alignment.TopEnd)
-                .offset(x = FAB_OVERHANG_X, y = -FAB_RAISE),
+                .align(Alignment.CenterEnd)
+                .offset(x = DOCK_HEIGHT + FAB_SIDE_GAP),
         ) {
             Box(
                 modifier = Modifier
@@ -232,8 +234,5 @@ private fun RowScope.DockItem(tab: Tab, selected: Boolean, iconColor: Color, onC
 
 val DOCK_HEIGHT = 72.dp
 private val DOCK_WIDTH = 204.dp
-/** How far the add button sits above the pill's top edge. 96 dp lifts the 72 dp button so its
- *  lower edge clears the pill top by 24 dp and it overlaps nothing. */
-val FAB_RAISE = 96.dp
-/** How far the add button sticks out past the pill's right edge. */
-private val FAB_OVERHANG_X = 32.dp
+/** Gap between the add button and the pill when it sits beside the pill. */
+private val FAB_SIDE_GAP = 8.dp
