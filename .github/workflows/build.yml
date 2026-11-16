@@ -32,13 +32,14 @@ jobs:
           distribution: temurin
           java-version: "25"
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
       - name: Install Android platform and build tools
+        # The runner image already ships an Android SDK (ANDROID_HOME is set
+        # and sdkmanager is on PATH); the setup-android action is not used
+        # because it tries to install the obsolete "tools" package and fails.
         # API 37 is only in the canary channel of sdkmanager, hence --channel=3
         # for the platform. Build tools and platform-tools come from stable.
         run: |
+          yes | sdkmanager --licenses
           sdkmanager "platform-tools" "build-tools;37.0.0"
           sdkmanager --channel=3 "platforms;android-37.0"
 
