@@ -146,7 +146,9 @@ fun AlarmPickerSheetContent(
             )
         }
 
-        Spacer(Modifier.height(8.dp))
+        // A clear gap here: the header sat only 8 dp above the time wheel and read
+        // as crowding it.
+        Spacer(Modifier.height(14.dp))
 
         Box(
             modifier = Modifier
@@ -192,7 +194,9 @@ fun AlarmPickerSheetContent(
         }
 
         if (!is24Hour) {
-            Spacer(Modifier.height(2.dp))
+            // A clear gap here: the AM/PM buttons sat only 2 dp below the time wheel,
+            // so the wheel's faded bottom digits read as overlapping them.
+            Spacer(Modifier.height(14.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
